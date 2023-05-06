@@ -5,13 +5,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
-using Timelogger.Entities;
-using System;
 using RetailManagement.Utils;
+using Timelogger.Repos;
+using Timelogger.Services;
+using System;
+using Timelogger.Api.Handlers;
+using Timelogger.Model;
 
 namespace Timelogger.Api
 {
-	public class Startup
+    public class Startup
 	{
 		private readonly IWebHostEnvironment _environment;
 		public IConfigurationRoot Configuration { get; }
@@ -31,8 +34,19 @@ namespace Timelogger.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+            services.AddScoped<IProjectRepository, ProjectRepository>();
+            services.AddScoped<ITimeslotRepository, TimeslotRepository>();
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<ITimeslotService, TimeslotService>();
+            services.AddScoped<ICustomerService, CustomerService>();
+
+            services.AddScoped<IProjectHandler, ProjectHandler>();
+            services.AddScoped<ITimeslotHandler, TimeslotHandler>();
+            services.AddScoped<ICustomerHandler, CustomerHandler>();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddSwaggerGen();
 
@@ -94,15 +108,44 @@ namespace Timelogger.Api
 		private static void SeedDatabase(IServiceScope scope)
 		{
 			var context = scope.ServiceProvider.GetService<ApiContext>();
-			var testProject1 = new Project
+			var testCustomer = new Customer
 			{
-				Id = 1,
-				Name = "e-conomic Interview"
+				ID = Guid.NewGuid(),
+				Name = "Test customer",
 			};
 
-			context.Projects.Add(testProject1);
+			var testProject1 = new Project
+			{
+				ID = Guid.NewGuid(),
+				Name = "test project",
+				StartDate = DateTime.UtcNow,
+				EndDate = DateTime.UtcNow.AddDays(7),
+				Deadline = DateTime.UtcNow.AddDays(5),
+				CustomerId = testCustomer.ID
+            };
 
-			context.SaveChanges();
+			var testSlot1 = new Timeslot
+			{
+				ID = Guid.NewGuid(),
+				StartTime = DateTimeOffset.UtcNow,
+				Duration = TimeSpan.FromMinutes(30),
+				ProjectId = testProject1.ID
+			};
+
+            var testSlot2 = new Timeslot
+            {
+                ID = Guid.NewGuid(),
+                StartTime = DateTimeOffset.UtcNow.AddHours(3),
+                Duration = TimeSpan.FromMinutes(60),
+                ProjectId = testProject1.ID
+            };
+
+            context.Customers.Add(testCustomer);
+            context.Projects.Add(testProject1);
+            context.Timeslots.Add(testSlot1);
+            context.Timeslots.Add(testSlot2);
+
+            context.SaveChanges();
 		}
 	}
 }

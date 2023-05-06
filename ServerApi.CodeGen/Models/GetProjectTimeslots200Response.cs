@@ -24,15 +24,21 @@ namespace ServerApi.CodeGen.Models
     /// 
     /// </summary>
     [DataContract]
-    public class ErrorDTO 
+    public class GetProjectTimeslots200Response 
     {
         /// <summary>
-        /// A human readable error message
+        /// Gets or Sets Data
         /// </summary>
-        /// <value>A human readable error message</value>
         [Required]
-        [DataMember(Name="message", EmitDefaultValue=false)]
-        public string Message { get; set; }
+        [DataMember(Name="data", EmitDefaultValue=false)]
+        public List<TimeslotDTO> Data { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Pagination
+        /// </summary>
+        [Required]
+        [DataMember(Name="pagination", EmitDefaultValue=false)]
+        public PaginationDTO Pagination { get; set; }
 
     }
 }

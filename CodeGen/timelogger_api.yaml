@@ -341,13 +341,17 @@ paths:
                   name: search-key
                   required: true
                   schema:
-                      type: string
+                      type: array
+                      items:
+                          type: string
                   description: name of the field to search by
                 - in: query
                   name: search-value
                   required: true
                   schema:
-                      type: string
+                      type: array
+                      items:
+                          type: string
                   description: value of the field to search with
                 - in: query
                   name: filter key
@@ -542,9 +546,17 @@ paths:
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: "#/components/schemas/TimeslotDTO"
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/TimeslotDTO"
+                                    pagination:
+                                        $ref: "#/components/schemas/PaginationDTO"
+                                required:
+                                    - data
+                                    - pagination
                 500:
                     description: Unexpected error
                     content:
@@ -571,8 +583,12 @@ components:
                    type: string
                 start_date:
                    type: string
+                end_date:
+                   type: string
                 deadline:
                    type: string
+                completed:
+                   type: boolean
                 customerId:
                     $ref: "#/components/schemas/Id"
             required:
@@ -586,11 +602,9 @@ components:
             properties:
                 id:
                    $ref: "#/components/schemas/Id"
-                date:
-                   type: string
                 start_time:
                    type: string
-                end_time:
+                Duration:
                    type: string
             required:
                 - date
@@ -608,8 +622,12 @@ components:
                    type: string
                 end_date:
                    type: string
-                total_time:
+                deadline:
                    type: string
+                completed:
+                   type: boolean
+                total_time:
+                   type: integer
                 total_records:
                     type: integer
                 customer_name:
