@@ -1,0 +1,657 @@
+openapi: "3.0.0"
+info:
+    version: "1.0.0"
+    title: "Timelogger API"
+    description: CRUD management of timelogger
+servers:
+  - url: /api/v1
+  
+paths:
+    /customer:
+        post:
+            operationId: AddCustomer
+            summary: Create a customer
+            requestBody:
+                description: Customer payload
+                content:
+                    "application/json":
+                        schema:
+                            $ref: "#/components/schemas/CustomerDTO"
+
+            responses:
+                201:
+                    description: The newly created customer
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CustomerDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        get:
+            operationId: GetCustomers
+            parameters:
+                - in: query
+                  name: offset
+                  schema:
+                      type: integer
+                  description: The number of items to skip before starting to collect the result set
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                  description: The numbers of items to return
+                - in: query
+                  name: filter key
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: name of the field to filter by
+                - in: query
+                  name: filter value
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                - in: query
+                  name: sort-key
+                  schema:
+                      type: string
+                  description: value of the field to sort by
+                - in: query
+                  name: sort-order
+                  schema:
+                      type: string
+                      enum: [asc, desc]
+                  description: sort order
+
+            summary: Fetch a list of customers
+            responses:
+                200:
+                    description: A list of customers
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/CustomerDTO"
+                                    pagination:
+                                        $ref: "#/components/schemas/PaginationDTO"
+                                required:
+                                    - data
+                                    - pagination
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+
+    /customer/{id}:
+        parameters:
+            - in: path
+              name: id
+              description: The unique identifier
+              required: true
+              schema:
+                  $ref: "#/components/schemas/Id"
+        get:
+            operationId: GetCustomer
+            summary: Fetch a customer
+            responses:
+                200:
+                    description: A customer
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CustomerDTO"
+                404:
+                    description: No customer found for the provided `Id`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        patch:
+            operationId: UpdateCustomer
+            summary: Patch a customer 
+            description: Body schema should follow format RFC 6902 (application/json-patch+json)
+            requestBody:
+                content:
+                  application/json:
+                       schema:
+                            type: object
+                            nullable: true
+            responses:
+                200:
+                    description: Success patching a customer
+                404:
+                    description: No customer found for the provided `Id`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+                409:
+                    description: Conflict detected during update
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        delete:
+            operationId: DeleteCustomer
+            summary: Delete a customer
+            responses:
+                200:
+                    description: Success deleting a customer
+                404:
+                    description: No customer found for the provided `Id`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+
+    /projects:
+        post:
+            operationId: AddProject
+            summary: Create a project
+            requestBody:
+                description: Project payload
+                content:
+                    "application/json":
+                        schema:
+                            $ref: "#/components/schemas/ProjectDTO"
+
+            responses:
+                201:
+                    description: The newly created project
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ProjectDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        get:
+            operationId: GetProjects
+            parameters:
+                - in: query
+                  name: offset
+                  schema:
+                      type: integer
+                  description: The number of items to skip before starting to collect the result set
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                  description: The numbers of items to return
+                - in: query
+                  name: filter key
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: name of the field to filter by
+                - in: query
+                  name: filter value
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: value of the field to filter with
+                - in: query
+                  name: sort-key
+                  schema:
+                      type: string
+                  description: value of the field to sort by
+                - in: query
+                  name: sort-order
+                  schema:
+                      type: string
+                      enum: [asc, desc]
+                  description: sort order
+
+            summary: Fetch a list of projects
+            responses:
+                200:
+                    description: A list of projects
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/ProjectDTO"
+                                    pagination:
+                                        $ref: "#/components/schemas/PaginationDTO"
+                                required:
+                                    - data
+                                    - pagination
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO" 
+    /projects/overview:
+        get:
+            operationId: GetProjectsOverview
+            parameters:
+                - in: query
+                  name: offset
+                  schema:
+                      type: integer
+                  description: The number of items to skip before starting to collect the result set
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                  description: The numbers of items to return
+                - in: query
+                  name: filter key
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: name of the field to filter by
+                - in: query
+                  name: filter value
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: value of the field to filter with
+                - in: query
+                  name: sort-key
+                  schema:
+                      type: string
+                  description: value of the field to sort by
+                - in: query
+                  name: sort-order
+                  schema:
+                      type: string
+                      enum: [asc, desc]
+                  description: sort order
+            summary: Fetch a list of projects
+            responses:
+                200:
+                    description: A list of project overview
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/ProjectReportDTO"
+                                    pagination:
+                                        $ref: "#/components/schemas/PaginationDTO"
+                                required:
+                                    - data
+                                    - pagination
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO" 
+
+    /projects/search:    
+        get:
+            operationId: SearchProjects
+            parameters:
+                - in: query
+                  name: offset
+                  required: true
+                  schema:
+                      type: integer
+                  description: The number of items to skip before starting to collect the result set
+                - in: query
+                  name: limit
+                  required: true
+                  schema:
+                      type: integer
+                  description: The numbers of items to return
+                - in: query
+                  name: search-key
+                  required: true
+                  schema:
+                      type: string
+                  description: name of the field to search by
+                - in: query
+                  name: search-value
+                  required: true
+                  schema:
+                      type: string
+                  description: value of the field to search with
+                - in: query
+                  name: filter key
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: name of the field to filter by
+                - in: query
+                  name: filter value
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: value of the field to filter with
+                - in: query
+                  name: sort-key
+                  schema:
+                      type: string
+                  description: value of the field to sort by
+                - in: query
+                  name: sort-order
+                  schema:
+                      type: string
+                      enum: [asc, desc]
+                  description: sort order
+            summary: Search list of projects
+            responses:
+                200:
+                    description: A list of projects
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/ProjectDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+    /projects/{id}:
+        parameters:
+            - in: path
+              name: id
+              description: The unique identifier
+              required: true
+              schema:
+                  $ref: "#/components/schemas/Id"
+        get:
+            operationId: GetProject
+            summary: Fetch a project
+            responses:
+                200:
+                    description: A project
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ProjectDTO"
+                404:
+                    description: No project found for the provided `Id`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        patch:
+            operationId: UpdateProject
+            summary: Patch a project 
+            description: Body schema should follow format RFC 6902 (application/json-patch+json)
+            requestBody:
+                content:
+                  application/json:
+                       schema:
+                            type: object
+                            nullable: true
+            responses:
+                200:
+                    description: Success patching a project
+                404:
+                    description: No project found for the provided `Id`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+                409:
+                    description: Conflict detected during update
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        delete:
+            operationId: DeleteProject
+            summary: Delete a project
+            responses:
+                200:
+                    description: Success deleting a project
+                404:
+                    description: No project found for the provided `Id`
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+
+    /projects/{id}/timeslots:
+        parameters:
+            - in: path
+              name: id
+              description: The unique identifier
+              required: true
+              schema:
+                  $ref: "#/components/schemas/Id"
+        post:
+            operationId: AddProjectTimeslot
+            summary: Create a Timeslot
+            requestBody:
+                description: Timeslot payload
+                content:
+                    "application/json":
+                        schema:
+                            $ref: "#/components/schemas/TimeslotDTO"
+
+            responses:
+                201:
+                    description: The newly created Timeslot
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/TimeslotDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+        get:
+            operationId: GetProjectTimeslots
+            parameters:
+                - in: query
+                  name: offset
+                  schema:
+                      type: integer
+                  description: The number of timeslots to skip before starting to collect the result set
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                  description: The numbers of timeslots to return
+                - in: query
+                  name: filter key
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: name of the field to filter by
+                - in: query
+                  name: filter value
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: value of the field to filter with
+                - in: query
+                  name: sort-key
+                  schema:
+                      type: string
+                  description: value of the field to sort by
+                - in: query
+                  name: sort-order
+                  schema:
+                      type: string
+                      enum: [asc, desc]
+                  description: sort order
+            summary: Fetch a list of timeslots
+            responses:
+                200:
+                    description: A list of timeslots
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/TimeslotDTO"
+                500:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorDTO"
+    
+
+
+components:
+    schemas:
+        Id:
+            description: The unique identifier
+            type: string
+            format: uuid
+            nullable: false
+
+        ProjectDTO:
+            type: object
+            properties:
+                id:
+                   $ref: "#/components/schemas/Id"
+                name:
+                   type: string
+                start_date:
+                   type: string
+                deadline:
+                   type: string
+                customerId:
+                    $ref: "#/components/schemas/Id"
+            required:
+                - name
+                - start_date
+                - deadline
+                - customerId
+
+        TimeslotDTO:
+            type: object
+            properties:
+                id:
+                   $ref: "#/components/schemas/Id"
+                date:
+                   type: string
+                start_time:
+                   type: string
+                end_time:
+                   type: string
+            required:
+                - date
+                - start_time
+                - end_time
+
+        ProjectReportDTO:
+            type: object
+            properties:
+                project_id:
+                    $ref: "#/components/schemas/Id"
+                project_name:
+                    type: string
+                start_date:
+                   type: string
+                end_date:
+                   type: string
+                total_time:
+                   type: string
+                total_records:
+                    type: integer
+                customer_name:
+                    type: string
+
+            required:
+                - project_id
+                - project_name
+                - start_date
+                - total_time
+                - total_records
+
+        CustomerDTO:
+            type: object
+            properties:
+                id:
+                   $ref: "#/components/schemas/Id"
+                name:
+                   type: string
+            required:
+                - name
+
+
+        PaginationDTO:
+            type: object
+            properties:
+                page:
+                   type: integer
+                per_page:
+                   type: integer
+                total_records:
+                   type: integer
+            required:
+                - page
+                - per_page
+                - total_records
+    
+        ErrorDTO:
+            type: object
+            required:
+                - message
+            properties:
+                message:
+                    description: A human readable error message
+                    type: string

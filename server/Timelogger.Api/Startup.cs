@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Timelogger.Entities;
+using System;
+using RetailManagement.Utils;
 
 namespace Timelogger.Api
 {
@@ -29,8 +31,18 @@ namespace Timelogger.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			// Add framework services.
-			services.AddDbContext<ApiContext>(opt => opt.UseInMemoryDatabase("e-conomic interview"));
+
+            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddSwaggerGen();
+
+            services.AddControllers(options =>
+            {
+                options.InputFormatters.Insert(0, JsonPatchInputFormatterExt.GetJsonPatchInputFormatter());
+            }).AddNewtonsoftJson();
+
+            // Add framework services.
+            services.AddDbContext<ApiContext>(opt => opt.UseInMemoryDatabase("e-conomic interview"));
 			services.AddLogging(builder =>
 			{
 				builder.AddConsole();
@@ -56,10 +68,23 @@ namespace Timelogger.Api
 					.AllowCredentials());
 			}
 
-			app.UseMvc();
+            app.UseStaticFiles();
+            app.UseMvc();
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "openapi/{documentName}/openapi.json";
+            })
+               .UseSwaggerUI(c =>
+               {
+                   // set route prefix to openapi, e.g. http://localhost:8080/openapi/index.html
+                   c.RoutePrefix = "openapi";
+
+                   //TODO: Or alternatively use the original OpenAPI contract that's included in the static files
+                   c.SwaggerEndpoint("/api/openapi", "timelogger api");
+               });
 
 
-			var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+            var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
 			using (var scope = serviceScopeFactory.CreateScope())
 			{
 				SeedDatabase(scope);
