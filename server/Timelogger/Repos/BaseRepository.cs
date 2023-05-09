@@ -7,14 +7,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Timelogger.Model;
+using System.Linq.Dynamic.Core;
 
 namespace Timelogger.Repos
 {
-    public enum SortOrder
-    {
-        ASC,
-        DESC
-    }
     public interface IBaseRepository<I> where I : BaseEntity
     {
         Task<I> Create(I entity);
@@ -22,8 +18,8 @@ namespace Timelogger.Repos
         Task<RequestResultStatus> Delete(Guid id);
         Task<(I entity, RequestResultStatus status)> Get(Guid id);
         Task<(I entity, RequestResultStatus status)> Patch(Guid id, JsonPatchDocument jsonPatch);
-        (IQueryable<I> query, int count) GetAll(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, SortOrder sortOrder, params Expression<Func<I, object>>[] includes);
-        IQueryable<I> SearchAll(int offset, int limit, List<string> filterKey, List<string> filterValue, List<string> searchKey, List<string> searchValue, string sortKey, SortOrder sortOrder);
+        (IQueryable<I> query, int count) GetAll(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder, params Expression<Func<I, object>>[] includes);
+        IQueryable<I> SearchAll(int offset, int limit, List<string> filterKey, List<string> filterValue, List<string> searchKey, List<string> searchValue, string sortKey, string sortOrder);
     }
 
     public abstract class BaseRepository<I, T> : IBaseRepository<I> where I : BaseEntity where T : DbSet<I>
@@ -109,16 +105,16 @@ namespace Timelogger.Repos
         }
 
 
-        public virtual (IQueryable<I> query, int count) GetAll(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, SortOrder sortOrder, params Expression<Func<I, object>>[] includes)
+        public virtual (IQueryable<I> query, int count) GetAll(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder, params Expression<Func<I, object>>[] includes)
         {
             var query = DbSet.AsQueryable<I>();
-            query = Expand(query,includes);
+            query = Expand(query, includes);
             var res = ApplyFilter(query, offset, limit, filterKey, filterValue);
             var ordered = OrderResults(res.query, sortKey, sortOrder);
             return (ordered, res.count);
         }
 
-        public virtual IQueryable<I> SearchAll(int offset, int limit, List<string> filterKey, List<string> filterValue, List<string> searchKey, List<string> searchValue, string sortKey, SortOrder sortOrder)
+        public virtual IQueryable<I> SearchAll(int offset, int limit, List<string> filterKey, List<string> filterValue, List<string> searchKey, List<string> searchValue, string sortKey, string sortOrder)
         {
             var query = DbSet.AsQueryable<I>();
             query = Filter(query, filterKey, filterValue);
@@ -133,16 +129,12 @@ namespace Timelogger.Repos
             return includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
         }
 
-        private static IQueryable<I> OrderResults(IQueryable<I> query, string sortKey, SortOrder sortOrder)
+        private static IQueryable<I> OrderResults(IQueryable<I> query, string sortKey, string sortOrder)
         {
-            switch (sortOrder)
-            {
-                case SortOrder.ASC:
-                    return query.OrderBy(q => EF.Property<Guid>(q, sortKey));
-                case SortOrder.DESC:
-                    return query.OrderByDescending(q => EF.Property<Guid>(q, sortKey));
-            }
-            throw new Exception("Invalid sort parametters");
+            if (sortKey == null || sortOrder == null)
+                return query;
+
+            return query.OrderBy($"{sortKey} {sortOrder}");
         }
 
         private static (IQueryable<I> query, int count) ApplyFilter(IQueryable<I> query, int? offset, int? limit, List<string> filterKey, List<string> filterValue)
@@ -165,17 +157,7 @@ namespace Timelogger.Repos
                 for (var i = 0; i < filterKey.Count; i++)
                 {
                     var idx = i;
-                    Guid output;
-                    bool isValid = Guid.TryParse(filterValue[idx], out output);
-                    if (isValid)
-                    {
-                        query = query.Where(p => EF.Property<Guid>(p, filterKey[idx]) == output);
-                    }
-                    else
-                    {
-                        query = query.Where(p => EF.Property<string>(p, filterKey[idx]) == filterValue[idx]);
-                    }
-
+                    query = query.Where($"{filterKey[idx]} == \"{filterValue[idx]}\"");
                 }
             }
             return query;
@@ -190,8 +172,7 @@ namespace Timelogger.Repos
                 for (var i = 0; i < filterKey.Count; i++)
                 {
                     var idx = i;
-                    var value = filterValue[idx].ToLower();
-                    query = query.Where(p => EF.Property<string>(p, filterKey[idx]).ToLower().Contains(value));
+                    query = query.Where($"{filterKey[idx]}.Contains(@0)", filterValue[idx]);
                 }
             }
             return query;

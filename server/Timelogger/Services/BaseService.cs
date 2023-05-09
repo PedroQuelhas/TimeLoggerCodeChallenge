@@ -56,20 +56,9 @@ namespace Timelogger.Services
             return (Mapper.Map<D>(entity), status);
         }
 
-        protected (string key, SortOrder order) ParseSortOrder(string sortKey, string sortOrder)
-        {
-            if (sortKey == null || sortOrder == null)
-                return ("ID", SortOrder.DESC);
-            var result = Enum.TryParse<SortOrder>(sortOrder, out var val);
-            if (!result)
-                throw new Exception("Invalid sort order value!");
-            return (sortKey, val);
-        }
-
         public virtual Task<(IEnumerable<D> data, PaginationDTO pagination)> GetAll(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder)
         {
-            var (key, order) = ParseSortOrder(sortKey, sortOrder);
-            var (query, count) = Repo.GetAll(offset, limit, filterKey, filterValue, key, order);
+            var (query, count) = Repo.GetAll(offset, limit, filterKey, filterValue, sortKey,sortOrder);
             var pag = new PaginationDTO { Page = offset ?? 0, PerPage = limit ?? 0, TotalRecords = count };
             var data = query.Select(i => Mapper.Map<D>(i));
             return Task.FromResult((data.AsEnumerable(), pag));
@@ -77,8 +66,7 @@ namespace Timelogger.Services
 
         public virtual Task<IEnumerable<D>> SearchAll(int offset, int limit, List<string> filterKey, List<string> filterValue, List<string> searchKey, List<string> searchValue, string sortKey, string sortOrder)
         {
-            var (key, order) = ParseSortOrder(sortKey, sortOrder);
-            var data = Repo.SearchAll(offset, limit, filterKey, filterValue, searchKey, searchValue, key, order).Select(i => Mapper.Map<D>(i));
+            var data = Repo.SearchAll(offset, limit, filterKey, filterValue, searchKey, searchValue, sortKey, sortOrder).Select(i => Mapper.Map<D>(i));
             return Task.FromResult(data.AsEnumerable());
         }
 

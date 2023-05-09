@@ -27,8 +27,7 @@ namespace Timelogger.Services
 
         public Task<(IEnumerable<ProjectReportDTO> data, PaginationDTO pagination)> GetProjectsOverview(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder)
         {
-            var (key, order) = ParseSortOrder(sortKey, sortOrder);
-            var (data, count) = _repo.GetAllProjectsExpanded(offset, limit, filterKey, filterValue, key, order);
+            var (data, count) = _repo.GetAllProjectsExpanded(offset, limit, filterKey, filterValue, sortKey,sortOrder);
             var pag = new PaginationDTO { Page = offset ?? 0, PerPage = limit ?? 0, TotalRecords = count };
             var reports = CreateProjectReports(data);
             return Task.FromResult((reports, pag));
@@ -52,8 +51,7 @@ namespace Timelogger.Services
 
         public Task<(IEnumerable<TimeslotDTO> data, PaginationDTO pagination)> GetProjectTimeslots(Guid id, int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder)
         {
-            var (key, order) = ParseSortOrder(sortKey, sortOrder);
-            var (query, count) = _timeslotRepository.GetProjectTimeslots(id, offset, limit, filterKey, filterValue, key, order);
+            var (query, count) = _timeslotRepository.GetProjectTimeslots(id, offset, limit, filterKey, filterValue, sortKey, sortOrder);
             var pag = new PaginationDTO { Page = offset ?? 0 , PerPage = limit ?? 0 , TotalRecords = count };
             return Task.FromResult((query.Select(i => Mapper.Map<TimeslotDTO>(i)), pag));
         }
