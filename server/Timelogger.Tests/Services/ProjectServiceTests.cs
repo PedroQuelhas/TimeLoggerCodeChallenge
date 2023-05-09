@@ -42,6 +42,32 @@ namespace Timelogger.Tests.Services
             result.data.ToList().Should().BeEquivalentTo(results);
         }
 
+        [TestMethod]
+        public async Task GetProjectsOverview_OnePageProjectsNoFiltersNoSorting_Success()
+        {
+            var fakeRepo = A.Fake<IProjectRepository>();
+            var fakeRimeslotRepo = A.Fake<ITimeslotRepository>();
+            var fakeMapper = A.Fake<IMapper>();
+
+            var projects = GetProjects().Skip(1);
+            var results = GetProjectResults().Skip(1);
+
+            A.CallTo(() => fakeRepo.GetAllProjectsExpanded(1, 1, null, null, "ID", SortOrder.DESC)).Returns((projects, 1));
+
+            var paginationDTO = new PaginationDTO
+            {
+                Page = 1,
+                PerPage = 1,
+                TotalRecords = 1
+            };
+
+            var service = new ProjectService(fakeRepo, fakeRimeslotRepo, fakeMapper);
+            var result = await service.GetProjectsOverview(1, 1, null, null, null, null);
+            result.pagination.Should().BeEquivalentTo(paginationDTO);
+            result.data.ToList().Should().BeEquivalentTo(results);
+        }
+
+
         private List<ProjectReportDTO> GetProjectResults() => new List<ProjectReportDTO>
         {
             new ProjectReportDTO
