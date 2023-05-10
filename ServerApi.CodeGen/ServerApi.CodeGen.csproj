@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>ServerApi.CodeGen</AssemblyName>
     <PackageId>ServerApi.CodeGen</PackageId>
-    <UserSecretsId>e3d386e4-ef69-4b25-9791-b6066bf9ecfd</UserSecretsId>
+    <UserSecretsId>15999d88-de2c-4475-83eb-58bc8fdf65e5</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>

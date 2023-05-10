@@ -7,7 +7,7 @@ namespace Timelogger.Model
     public class Timeslot :BaseEntity
     {
         public DateTimeOffset StartTime { get; set; }
-        public TimeSpan Duration { get; set; }
+        public int DurationInMinutes { get; set; }
         public Guid ProjectId { get; set; }
     }
 

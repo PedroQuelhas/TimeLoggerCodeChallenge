@@ -4,12 +4,14 @@ using ServerApi.CodeGen.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Timelogger.Api.Utils;
 using Timelogger.Services;
 
 namespace Timelogger.Api.Handlers
 {
     public interface IProjectHandler : IBaseHandler<ProjectDTO>
     {
+        Task<IActionResult> AddProjectTimeSlot(Guid projectId,TimeslotDTO timeSlot);
         Task<IActionResult> GetProjectsOverview(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder);
         Task<IActionResult> GetProjectTimeslots(Guid id, int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder);
     }
@@ -20,6 +22,12 @@ namespace Timelogger.Api.Handlers
         public ProjectHandler(IProjectService service) : base(service)
         {
             _service = service;
+        }
+
+        public async Task<IActionResult> AddProjectTimeSlot(Guid projectId, TimeslotDTO timeSlot)
+        {
+            var status = await _service.AddProjectTimeSlot(projectId, timeSlot);
+            return status.GetActionResult(status);
         }
 
         public async Task<IActionResult> GetProjectsOverview(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder)

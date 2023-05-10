@@ -11,6 +11,7 @@ namespace Timelogger.Services
 {
     public interface IProjectService : IBaseService<ProjectDTO>
     {
+        Task<RequestResultStatus> AddProjectTimeSlot(Guid projectId, TimeslotDTO timeSlot);
         Task<(IEnumerable<ProjectReportDTO> data, PaginationDTO pagination)> GetProjectsOverview(int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder);
         Task<(IEnumerable<TimeslotDTO> data, PaginationDTO pagination)> GetProjectTimeslots(Guid id, int? offset, int? limit, List<string> filterKey, List<string> filterValue, string sortKey, string sortOrder);
     }
@@ -18,6 +19,7 @@ namespace Timelogger.Services
     {
         private readonly IProjectRepository _repo;
         private readonly ITimeslotRepository _timeslotRepository;
+        private const int MinimumSlotDuration = 30;
 
         public ProjectService(IProjectRepository repo,ITimeslotRepository timeslotRepository,IMapper mapper) : base(repo,mapper) 
         {
@@ -45,7 +47,7 @@ namespace Timelogger.Services
                 Deadline = p.Deadline.ToString(),
                 Completed = p.Completed,
                 TotalRecords = p.Timeslots.Count(),
-                TotalTime = p.Timeslots.Sum(t=>(int)t.Duration.TotalMinutes)
+                TotalTime = p.Timeslots.Sum(t=>t.DurationInMinutes)
             });
         }
 
@@ -54,6 +56,14 @@ namespace Timelogger.Services
             var (query, count) = _timeslotRepository.GetProjectTimeslots(id, offset, limit, filterKey, filterValue, sortKey, sortOrder);
             var pag = new PaginationDTO { Page = offset ?? 0 , PerPage = limit ?? 0 , TotalRecords = count };
             return Task.FromResult((query.Select(i => Mapper.Map<TimeslotDTO>(i)), pag));
+        }
+
+        public Task<RequestResultStatus> AddProjectTimeSlot(Guid projectId, TimeslotDTO timeSlot)
+        {
+            if (timeSlot.DurationInMinutes < MinimumSlotDuration)
+                return Task.FromResult(RequestResultStatus.BAD_REQUEST);
+            var entity = Mapper.Map<Timeslot>(timeSlot);
+            return _repo.AddProjectTimeSlot(projectId, entity);
         }
     }
 }

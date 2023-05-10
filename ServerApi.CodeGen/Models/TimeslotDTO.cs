@@ -41,10 +41,10 @@ namespace ServerApi.CodeGen.Models
         public string StartTime { get; set; }
 
         /// <summary>
-        /// Gets or Sets Duration
+        /// Gets or Sets DurationInMinutes
         /// </summary>
-        [DataMember(Name="Duration", EmitDefaultValue=false)]
-        public string Duration { get; set; }
+        [DataMember(Name="DurationInMinutes", EmitDefaultValue=true)]
+        public int DurationInMinutes { get; set; }
 
     }
 }

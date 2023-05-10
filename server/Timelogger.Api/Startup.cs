@@ -128,7 +128,7 @@ namespace Timelogger.Api
 			{
 				ID = Guid.NewGuid(),
 				StartTime = DateTimeOffset.UtcNow,
-				Duration = TimeSpan.FromMinutes(30),
+				DurationInMinutes = 30,
 				ProjectId = testProject1.ID
 			};
 
@@ -136,7 +136,7 @@ namespace Timelogger.Api
             {
                 ID = Guid.NewGuid(),
                 StartTime = DateTimeOffset.UtcNow.AddHours(3),
-                Duration = TimeSpan.FromMinutes(60),
+                DurationInMinutes = 60,
                 ProjectId = testProject1.ID
             };
 
