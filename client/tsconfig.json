@@ -12,7 +12,7 @@
     "sourceMap": true,
     "noEmit": true,
     "allowJs": false,
-    "jsx": "react",
+    "jsx": "preserve",
     "declaration": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,

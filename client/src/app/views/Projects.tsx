@@ -1,12 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table from "../components/Table";
+import { GetAll,AddProjectHardcoded } from "../services/projects";
+import { Project } from "../services/projects/types";
+
+
 
 export default function Projects() {
+    const [projects,setProjects] = useState<Project[]>([])
+    const [reload,setReload] = useState<boolean>(false)
+
+
+    function HandleOnClick(){
+        AddProjectHardcoded().then(()=>
+        setReload(!reload))
+    }
+
+    useEffect(()=>{
+        GetAll().then((data)=>setProjects(data.data));
+    },[reload])
+
     return (
         <>
             <div className="flex items-center my-6">
                 <div className="w-1/2">
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button onClick={()=>HandleOnClick()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Add entry
                     </button>
                 </div>
@@ -29,7 +46,9 @@ export default function Projects() {
                 </div>
             </div>
 
-            <Table />
+           {
+            projects.length>0 && <Table projects={projects} />
+           }
         </>
     );
 }
